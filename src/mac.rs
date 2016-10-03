@@ -5,7 +5,7 @@ macro_rules! c {
     () => {};
 
     // Parse toplevel #include macros
-    (#include < $i:ident > $($rest:tt)*) => {c!{$($rest)*}};
+    (#include < $i:ident .h> $($rest:tt)*) => {c!{$($rest)*}};
     (#include $l:tt $($rest:tt)*) => {c!{$($rest)*}};
 
     // Parse toplevel raw macros
