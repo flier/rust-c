@@ -1,4 +1,4 @@
-cpp! {
+c! {
     fn inner_impl() -> i32 as "int32_t" {
         return 10;
     }
