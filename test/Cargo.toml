@@ -1,11 +1,11 @@
 [package]
-name = "cpp_test"
+name = "c_test"
 version = "0.1.0"
 authors = ["Michael Layzell <michael@thelayzells.com>"]
 build = "build.rs"
 
 [build-dependencies]
-cpp = { path = "../", features = ["build"] }
+c = { path = "../", features = ["build"] }
 
 [dependencies]
-cpp = { path = "../", features = ["macro"] }
+c = { path = "../", features = ["macro"] }
