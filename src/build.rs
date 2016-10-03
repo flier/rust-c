@@ -32,40 +32,27 @@ const RUST_TYPES_HEADER: &'static str = r#"
 #ifndef _RUST_TYPES_H_
 #define _RUST_TYPES_H_
 
-#include <cstdint>
+#include <stdint.h>
 
-namespace rs {
-    typedef int8_t i8;
-    static_assert(sizeof(i8) == 1, "int is the right size");
-    typedef int16_t i16;
-    static_assert(sizeof(i16) == 2, "int is the right size");
-    typedef int32_t i32;
-    static_assert(sizeof(i32) == 4, "int is the right size");
-    typedef int64_t i64;
-    static_assert(sizeof(i64) == 8, "int is the right size");
-    typedef intptr_t isize;
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+typedef intptr_t isize;
 
-    typedef uint8_t u8;
-    static_assert(sizeof(u8) == 1, "int is the right size");
-    typedef uint16_t u16;
-    static_assert(sizeof(u16) == 2, "int is the right size");
-    typedef uint32_t u32;
-    static_assert(sizeof(u32) == 4, "int is the right size");
-    typedef uint64_t u64;
-    static_assert(sizeof(u64) == 8, "int is the right size");
-    typedef uintptr_t usize;
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef uintptr_t usize;
 
-    typedef float f32;
-    static_assert(sizeof(f32) == 4, "float is the right size");
-    typedef double f64;
-    static_assert(sizeof(f64) == 8, "float is the right size");
+typedef float f32;
+typedef double f64;
 
-    typedef u8 bool_;
-    static_assert(sizeof(bool_) == 1, "booleans are the right size");
+typedef u8 bool_;
 
-    typedef uint32_t char_;
-    static_assert(sizeof(char_) == 4, "char is the right size");
-}
+typedef uint32_t char_;
+
 #endif
 "#;
 
@@ -92,7 +79,7 @@ pub fn build<P: AsRef<Path>, F>(src: P, name: &str, configure: F)
     {
         // Create the syntax extensions
         let syntax_exts = vec![
-            mk_macro("cpp", Cpp(state.clone())),
+            mk_macro("c", C(state.clone())),
         ];
 
         // Run the expanders on the crate
@@ -125,19 +112,17 @@ pub fn build<P: AsRef<Path>, F>(src: P, name: &str, configure: F)
 
     let out_dir = env::var("OUT_DIR")
         .expect("Environment Variable OUT_DIR must be set");
-    let file = Path::new(&out_dir).join(&format!("{}.cpp", name));
+    let file = Path::new(&out_dir).join(&format!("{}.c", name));
     let rust_types_file = Path::new(&out_dir).join("rust_types.h");
 
     // Generate the output code
     {
         let state = state.borrow();
         let code = String::from_iter([
-            "// This is machine generated code, created by rust-cpp\n",
+            "// This is machine generated code, created by rust-c\n",
             &state.includes[..],
             &state.headers[..],
-            "extern \"C\" {\n",
             &state.fndecls[..],
-            "}",
         ].iter().cloned());
 
         // Write out the file
@@ -154,7 +139,7 @@ pub fn build<P: AsRef<Path>, F>(src: P, name: &str, configure: F)
     // Invoke gcc to build the library.
     {
         let mut config = gcc::Config::new();
-        config.cpp(true).file(file);
+        config.file(file);
         configure(&mut config);
         config.compile(&format!("lib{}.a", name));
     }
@@ -295,9 +280,9 @@ fn expand_fn<'s>(ec: &mut ExtCtxt<'s>,
                 try!(p.expect(&Token::Colon));
                 try!(p.parse_ty_sum());
                 try!(p.expect_keyword(keywords::As));
-                let (cppty, _) = try!(p.parse_str());
+                let (cty, _) = try!(p.parse_str());
 
-                Ok(format!("{} {}", cppty, name))
+                Ok(format!("{} {}", cty, name))
             }));
 
     name_args.push('(');
@@ -320,8 +305,8 @@ fn expand_fn<'s>(ec: &mut ExtCtxt<'s>,
         // XXX: Allow ! as a return type?
         try!(parser.parse_ty());
         try!(parser.expect_keyword(keywords::As));
-        let (cppty, _) = try!(parser.parse_str());
-        func.push_str(&cppty);
+        let (cty, _) = try!(parser.parse_str());
+        func.push_str(&cty);
     } else {
         func.push_str("void");
     }
@@ -352,13 +337,6 @@ fn expand_enum<'s>(ec: &mut ExtCtxt<'s>,
     // Parse the function name. If we see "class" or "prefix", then record the
     // relevant information and parse another ident
     let mut id = try!(parser.parse_ident());
-    if id.name.as_str() == "class" {
-        s.push_str("class ");
-        id = try!(parser.parse_ident());
-    } else if id.name.as_str() == "prefix" {
-        add_prefix = true;
-        id = try!(parser.parse_ident());
-    }
 
     s.push_str(&id.name.as_str());
     s.push_str(" {\n");
@@ -418,9 +396,9 @@ fn expand_struct<'s>(ec: &mut ExtCtxt<'s>,
                 try!(p.expect(&Token::Colon));
                 try!(p.parse_ty_sum());
                 try!(p.expect_keyword(keywords::As));
-                let (cppty, _) = try!(p.parse_str());
+                let (cty, _) = try!(p.parse_str());
 
-                Ok(format!("    {} {};\n", cppty, name))
+                Ok(format!("    {} {};\n", cty, name))
             }));
 
     for arg in args {
@@ -435,8 +413,8 @@ fn expand_struct<'s>(ec: &mut ExtCtxt<'s>,
     Ok(())
 }
 
-struct Cpp(Rc<RefCell<State>>);
-impl TTMacroExpander for Cpp {
+struct C(Rc<RefCell<State>>);
+impl TTMacroExpander for C {
     fn expand<'cx>(&self,
                    ec: &'cx mut ExtCtxt,
                    mac_span: Span,
@@ -491,7 +469,7 @@ impl TTMacroExpander for Cpp {
             };
 
             if let Err(mut e) = res {
-                e.span_note(mac_span, "While parsing cpp! macro");
+                e.span_note(mac_span, "While parsing c! macro");
                 e.emit();
                 return DummyResult::any(mac_span)
             }
