@@ -1,52 +1,52 @@
 // Rust code generation
 #[macro_export]
-macro_rules! cpp {
+macro_rules! c {
     // Finished
     () => {};
 
     // Parse toplevel #include macros
-    (#include < $i:ident > $($rest:tt)*) => {cpp!{$($rest)*}};
-    (#include $l:tt $($rest:tt)*) => {cpp!{$($rest)*}};
+    (#include < $i:ident > $($rest:tt)*) => {c!{$($rest)*}};
+    (#include $l:tt $($rest:tt)*) => {c!{$($rest)*}};
 
     // Parse toplevel raw macros
-    (raw $body:tt $($rest:tt)*) => {cpp!{$($rest)*}};
+    (raw $body:tt $($rest:tt)*) => {c!{$($rest)*}};
 
     // Parse parameters
-    (CPP_PARAM $name:ident : $t:ty as $cppt:tt) => {
+    (C_PARAM $name:ident : $t:ty as $ct:tt) => {
         $name: $t
     };
-    (CPP_PARAM $name:ident : $t:ty as $cppt:tt , $($rest:tt)*) => {
+    (C_PARAM $name:ident : $t:ty as $ct:tt , $($rest:tt)*) => {
         $name: $t ,
-        cpp!{CPP_PARAM $($rest)*}
+        c!{C_PARAM $($rest)*}
     };
 
     // Parse function declarations
     ($(#[$m:meta])*
-     fn $id:ident ( $($name:ident : $t:ty as $cppt:tt),* ) -> $rt:ty as $rcppt:tt $body:tt $($rest:tt)*) => {
+     fn $id:ident ( $($name:ident : $t:ty as $ct:tt),* ) -> $rt:ty as $rct:tt $body:tt $($rest:tt)*) => {
         extern "C" {
             $(#[$m])*
             fn $id ( $($name : $t),* ) -> $rt ;
         }
-        cpp!{$($rest)*}
+        c!{$($rest)*}
     };
     ($(#[$m:meta])*
-     fn $id:ident ( $($name:ident : $t:ty as $cppt:tt),* ) $body:tt $($rest:tt)*) => {
+     fn $id:ident ( $($name:ident : $t:ty as $ct:tt),* ) $body:tt $($rest:tt)*) => {
         extern "C" {
             $(#[$m])*
             fn $id ( $($name : $t),* ) ;
         }
-        cpp!{$($rest)*}
+        c!{$($rest)*}
     };
 
     // Parse struct definiton
     ($(#[$m:meta])*
-     struct $id:ident { $($i:ident : $t:ty as $cpp:tt ,)* } $($rest:tt)*) => {
+     struct $id:ident { $($i:ident : $t:ty as $c:tt ,)* } $($rest:tt)*) => {
         $(#[$m])*
         #[repr(C)]
         struct $id {
             $($i : $t ,)*
         }
-        cpp!{$($rest)*}
+        c!{$($rest)*}
     };
 
     // Parse enum definition
@@ -57,28 +57,6 @@ macro_rules! cpp {
         enum $id {
             $($i ,)*
         }
-        cpp!{$($rest)*}
-    };
-
-    // Parse enum class definition
-    ($(#[$m:meta])*
-     enum class $id:ident { $($i:ident ,)* } $($rest:tt)*) => {
-        $(#[$m])*
-        #[repr(C)]
-        enum $id {
-            $($i ,)*
-        }
-        cpp!{$($rest)*}
-    };
-
-    // Parse prefixed enum definition
-    ($(#[$m:meta])*
-     enum prefix $id:ident { $($i:ident ,)* } $($rest:tt)*) => {
-        $(#[$m])*
-        #[repr(C)]
-        enum $id {
-            $($i ,)*
-        }
-        cpp!{$($rest)*}
+        c!{$($rest)*}
     };
 }
