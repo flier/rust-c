@@ -23,17 +23,19 @@ macro_rules! c {
     // Parse function declarations
     ($(#[$m:meta])*
      fn $id:ident ( $($name:ident : $t:ty as $ct:tt),* ) -> $rt:ty as $rct:tt $body:tt $($rest:tt)*) => {
-        extern "C" {
+        extern "C"
+		{
             $(#[$m])*
-            fn $id ( $($name : $t),* ) -> $rt ;
+            pub fn $id ( $($name : $t),* ) -> $rt ;
         }
         c!{$($rest)*}
     };
     ($(#[$m:meta])*
      fn $id:ident ( $($name:ident : $t:ty as $ct:tt),* ) $body:tt $($rest:tt)*) => {
-        extern "C" {
+        extern "C"
+		{
             $(#[$m])*
-            fn $id ( $($name : $t),* ) ;
+            pub fn $id ( $($name : $t),* ) ;
         }
         c!{$($rest)*}
     };
@@ -43,7 +45,8 @@ macro_rules! c {
      struct $id:ident { $($i:ident : $t:ty as $c:tt ,)* } $($rest:tt)*) => {
         $(#[$m])*
         #[repr(C)]
-        struct $id {
+        struct $id
+		{
             $($i : $t ,)*
         }
         c!{$($rest)*}
@@ -54,7 +57,8 @@ macro_rules! c {
      enum $id:ident { $($i:ident ,)* } $($rest:tt)*) => {
         $(#[$m])*
         #[repr(C)]
-        enum $id {
+        enum $id
+		{
             $($i ,)*
         }
         c!{$($rest)*}
