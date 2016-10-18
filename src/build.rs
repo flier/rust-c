@@ -123,13 +123,13 @@ pub fn build<P: AsRef<Path>, F>(src: P, name: &str, configure: F)
             &state.includes[..],
             &state.headers[..],
 			
-			"#ifdef __cplusplus\n",
+			"\n#ifdef __cplusplus\n",
 			"extern \"C\" {\n",
 			"#endif\n",
 						
             &state.fndecls[..],
 			
-			"#ifdef __cplusplus",
+			"\n#ifdef __cplusplus\n",
 			"}\n",
 			"#endif\n",
 			
