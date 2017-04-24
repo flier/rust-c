@@ -1,9 +1,9 @@
 [package]
-name = "c"
+name = "rust_c"
 version = "0.1.0"
 authors = ["Michael Layzell <michael@thelayzells.com>", "Raphael Cohn <raphael.cohn@stormmq.com>"]
 
-description = "Write C code inline in your rust code!"
+description = "Write C code inline in your rust code (hacky fork of rust-cpp / cpp crate)"
 repository = "https://github.com/lemonrock/rust-c"
 readme = "README.md"
 license = "MPL-2.0"
