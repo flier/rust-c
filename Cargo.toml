@@ -1,6 +1,6 @@
 [package]
 name = "rust_c"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Michael Layzell <michael@thelayzells.com>", "Raphael Cohn <raphael.cohn@stormmq.com>"]
 
 description = "Write C code inline in your rust code (hacky fork of rust-cpp / cpp crate)"
@@ -10,9 +10,9 @@ license = "MPL-2.0"
 keywords = ["c", "ffi", "syntex"]
 
 [features]
-build = ["gcc", "syntex_syntax"]
+build = ["cc", "syntex_syntax"]
 macro = []
 
 [dependencies]
-gcc = { version = "0.3", optional = true }
-syntex_syntax = { version = "0.42", optional = true }
+cc = { version = "1.0", optional = true }
+syntex_syntax = { version = "0.59.1", optional = true }

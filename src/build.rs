@@ -26,7 +26,7 @@ use syntex_syntax::feature_gate;
 use syntex_syntax::parse::{PResult, parser, common};
 use syntex_syntax::tokenstream::TokenTree;
 
-use gcc;
+use cc;
 
 const RUST_TYPES_HEADER: &'static str = r#"
 #ifndef _RUST_TYPES_H_

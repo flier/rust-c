@@ -3,7 +3,7 @@
 extern crate syntex_syntax;
 
 #[cfg(feature = "build")]
-extern crate gcc;
+extern crate cc;
 
 #[cfg(feature = "macro")]
 mod mac;
